@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -28,10 +28,15 @@ jobs:
       - name: Build
         run: npm run build
         
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
+      - name: Deploy to /docs
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          rm -rf docs
+          cp -r out docs
+          git add docs
+          git commit -m "Deploy to /docs directory"
+          git push
 
   deploy:
     environment:

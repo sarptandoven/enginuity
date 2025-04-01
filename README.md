@@ -47,8 +47,11 @@ npm run dev
 This project is configured for deployment on GitHub Pages. To deploy:
 
 1. Push your changes to the `main` branch
-2. GitHub Actions will automatically build and deploy the site
-3. The site will be available at `https://yourusername.github.io/enginuity`
+2. GitHub Actions will automatically:
+   - Build the Next.js application
+   - Deploy the static files to the `/docs` directory
+   - Push the changes to the main branch
+3. The site will be available at `https://yourusername.github.io/docs`
 
 ### Manual Deployment
 
@@ -58,8 +61,13 @@ If you need to deploy manually:
 # Build the project
 npm run build
 
-# The static files will be in the ./out directory
-# Copy these files to your GitHub Pages branch
+# Copy the built files to the /docs directory
+cp -r out docs
+
+# Commit and push the changes
+git add docs
+git commit -m "Update /docs directory"
+git push
 ```
 
 ## Supabase Setup
