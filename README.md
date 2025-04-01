@@ -22,8 +22,8 @@ Enginuity is a modern platform that helps you learn coding through personalized 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/enginunity.git
-cd enginunity
+git clone https://github.com/yourusername/enginuity.git
+cd enginuity
 ```
 
 2. Install dependencies:
@@ -48,7 +48,7 @@ This project is configured for deployment on GitHub Pages. To deploy:
 
 1. Push your changes to the `main` branch
 2. GitHub Actions will automatically build and deploy the site
-3. The site will be available at `https://yourusername.github.io/enginunity`
+3. The site will be available at `https://yourusername.github.io/enginuity`
 
 ### Manual Deployment
 
@@ -85,4 +85,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-For support, email support@enginunity.com or join our Discord community. 
+For support, email support@enginuity.com or join our Discord community.
