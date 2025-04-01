@@ -4,10 +4,18 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Supabase client with error handling
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase environment variables:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseKey
+  });
+}
+
+const supabase = createClient(supabaseUrl || '', supabaseKey || '');
 
 export default function WaitlistForm() {
   const [email, setEmail] = React.useState('');
@@ -17,6 +25,12 @@ export default function WaitlistForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    if (!supabaseUrl || !supabaseKey) {
+      setStatus('error');
+      setMessage('Configuration error. Please try again later.');
+      return;
+    }
+
     if (!email) {
       setStatus('error');
       setMessage('Please enter your email address');
@@ -28,11 +42,16 @@ export default function WaitlistForm() {
 
     try {
       // Check if email already exists
-      const { data: existingEmails } = await supabase
+      const { data: existingEmails, error: checkError } = await supabase
         .from('waitlist')
         .select('email')
         .eq('email', email)
         .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking email:', checkError);
+        throw checkError;
+      }
 
       if (existingEmails) {
         setStatus('error');
@@ -41,11 +60,14 @@ export default function WaitlistForm() {
       }
 
       // Insert new email
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('waitlist')
         .insert([{ email }]);
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Error inserting email:', insertError);
+        throw insertError;
+      }
 
       setStatus('success');
       setMessage('You have been added to the waitlist!');

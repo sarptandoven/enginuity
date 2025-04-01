@@ -23,15 +23,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Debug - Check Environment Variables
+        run: |
+          if [ -n "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            echo "NEXT_PUBLIC_SUPABASE_URL is set"
+          else
+            echo "NEXT_PUBLIC_SUPABASE_URL is NOT set"
+          fi
+          if [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY is set"
+          else
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY is NOT set"
+          fi
+      
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: 'npm'
+      
       - name: Install dependencies
         run: npm ci
-      - name: Build
-        run: npm run build
+      
+      - name: Build with environment check
+        run: |
+          echo "Building with environment variables..."
+          env | grep NEXT_PUBLIC || true
+          npm run build
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
