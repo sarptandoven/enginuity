@@ -2,7 +2,7 @@
 
 import { createElement, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import { FaCode, FaRobot, FaGraduationCap, FaRocket } from 'react-icons/fa';
+import { FaCode, FaRobot, FaGraduationCap, FaRocket } from 'react-icons/fa6';
 
 const MotionDiv = dynamic(() => import('framer-motion').then((mod) => mod.motion.div), { ssr: false });
 const WaitlistForm = dynamic(() => import('@/components/WaitlistForm'), { ssr: false });
@@ -83,7 +83,7 @@ export default function Home() {
           createElement('h2', {
             key: 'title',
             className: "text-4xl font-bold text-center mb-16",
-            children: "Why Choose Enginunity?"
+            children: "Why Choose Enginuity?"
           }),
           createElement('div', {
             key: 'grid',

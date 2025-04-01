@@ -1,6 +1,6 @@
-# Enginunity - AI-Powered Coding Education
+# Enginuity - AI-Powered Coding Education
 
-Enginunity is a modern platform that helps you learn coding through personalized AI-powered projects and guidance. Unlike traditional coding platforms, Enginunity adapts to your goals and creates custom learning experiences that match your aspirations.
+Enginuity is a modern platform that helps you learn coding through personalized AI-powered projects and guidance. Unlike traditional coding platforms, Enginuity adapts to your goals and creates custom learning experiences that match your aspirations.
 
 ## Features
 

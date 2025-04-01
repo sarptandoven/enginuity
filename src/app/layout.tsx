@@ -5,7 +5,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Enginunity - AI-Powered Coding Education',
+  title: 'Enginuity - AI-Powered Coding Education',
   description: 'Learn to code like a pro with personalized AI-powered projects and guidance.',
 };
 
