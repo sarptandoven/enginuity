@@ -1,18 +1,46 @@
 'use client';
 
-import React, { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function WaitlistForm() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = React.useState('');
+  const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = React.useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!email) {
+      setStatus('error');
+      setMessage('Please enter your email address');
+      return;
+    }
+
     setStatus('loading');
+    setMessage('');
 
     try {
+      // Check if email already exists
+      const { data: existingEmails } = await supabase
+        .from('waitlist')
+        .select('email')
+        .eq('email', email)
+        .single();
+
+      if (existingEmails) {
+        setStatus('error');
+        setMessage('This email is already on the waitlist');
+        return;
+      }
+
+      // Insert new email
       const { error } = await supabase
         .from('waitlist')
         .insert([{ email }]);
@@ -20,41 +48,73 @@ export default function WaitlistForm() {
       if (error) throw error;
 
       setStatus('success');
-      setMessage('Thank you for joining our waitlist!');
+      setMessage('You have been added to the waitlist!');
       setEmail('');
     } catch (error) {
+      console.error('Error:', error);
       setStatus('error');
       setMessage('Something went wrong. Please try again.');
-      console.error('Error:', error);
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (status !== 'idle') {
+      setStatus('idle');
+      setMessage('');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-        <input
-          type="email"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-          placeholder="Enter your email"
-          required
-          className="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          type="submit"
-          disabled={status === 'loading'}
-          className={`px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-200 ${
-            status === 'loading' ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          {status === 'loading' ? 'Joining...' : 'Join Waitlist'}
-        </button>
-      </div>
+    <div className="relative">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 w-full">
+          <input
+            type="email"
+            value={email}
+            onChange={handleEmailChange}
+            placeholder="Enter your email"
+            className="flex-1 px-6 py-4 bg-gray-900/50 backdrop-blur-sm rounded-xl 
+                     border border-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 
+                     outline-none transition-all duration-200 text-white placeholder-gray-400"
+            disabled={status === 'loading'}
+          />
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            className={`px-8 py-4 rounded-xl font-semibold transition-all duration-200
+                     ${status === 'loading' 
+                       ? 'bg-gray-700 cursor-not-allowed'
+                       : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25'
+                     }`}
+          >
+            {status === 'loading' ? (
+              <div className="flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              </div>
+            ) : (
+              'Join Waitlist'
+            )}
+          </button>
+        </form>
+      </motion.div>
+
       {message && (
-        <p className={`text-center ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className={`absolute left-0 right-0 text-center mt-4
+                     ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}
+        >
           {message}
-        </p>
+        </motion.div>
       )}
-    </form>
+    </div>
   );
 } 

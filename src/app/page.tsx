@@ -8,183 +8,101 @@ const WaitlistForm = dynamic(() => import('@/components/WaitlistForm'), {
   ssr: false,
 });
 
-interface Feature {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-interface Step {
-  step: string;
-  title: string;
-  description: string;
-}
-
-const features: Feature[] = [
-  {
-    icon: <FaRobot style={{ fontSize: '2rem', color: '#60a5fa' }} />,
-    title: "AI-Powered Learning",
-    description: "Personalized curriculum that adapts to your learning style and pace"
-  },
-  {
-    icon: <FaCode style={{ fontSize: '2rem', color: '#a78bfa' }} />,
-    title: "Real-World Projects",
-    description: "Work on practical projects that matter in today's tech landscape"
-  },
-  {
-    icon: <FaGraduationCap style={{ fontSize: '2rem', color: '#4ade80' }} />,
-    title: "Expert Guidance",
-    description: "Get mentored by industry professionals and AI assistants"
-  },
-  {
-    icon: <FaLightbulb style={{ fontSize: '2rem', color: '#facc15' }} />,
-    title: "Innovation Focus",
-    description: "Learn cutting-edge technologies and best practices"
-  }
-];
-
-const steps: Step[] = [
-  {
-    step: "01",
-    title: "Sign Up",
-    description: "Join our platform and tell us about your goals and experience"
-  },
-  {
-    step: "02",
-    title: "Get Your Path",
-    description: "Receive a personalized learning journey crafted by our AI"
-  },
-  {
-    step: "03",
-    title: "Start Learning",
-    description: "Begin your journey with hands-on projects and expert guidance"
-  }
-];
-
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+    <main className="min-h-screen bg-[#0A0A0B] text-white overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-radial from-blue-500/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A0A0B]" />
+      </div>
+
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 animate-gradient" />
-          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
-        </div>
-        
-        <div className="container mx-auto px-4 text-center z-10">
+      <section className="relative min-h-screen flex items-center justify-center px-4">
+        <div className="container max-w-6xl mx-auto z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
           >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-              Welcome to Enginuity
-            </h1>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Revolutionizing coding education with AI-powered personalized learning paths
-            </p>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mb-6"
+            >
+              <div className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                Enginuity
+              </div>
+              <div className="text-xl md:text-2xl mt-4 text-gray-400">
+                AI-Powered Personalized Learning Paths
+              </div>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <a href="#waitlist" className="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold px-8 py-4 rounded-lg hover:scale-105 transition-transform duration-200 shadow-lg">
-              Join the Waitlist
-            </a>
-          </motion.div>
-        </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-12"
+            >
+              Join the future of coding education. Get personalized learning paths, 
+              expert guidance, and hands-on projects tailored to your goals.
+            </motion.div>
 
-        <motion.div
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-        >
-          <div className="animate-bounce">
-            <a href="#features" className="text-gray-400 hover:text-white">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </a>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-gray-800 p-6 rounded-xl hover:bg-gray-700 transition-colors duration-300"
-              >
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-20 bg-black">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold">How It Works</h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {steps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center"
-              >
-                <div className="text-5xl font-bold text-blue-500 mb-4">{step.step}</div>
-                <h3 className="text-2xl font-semibold mb-4">{step.title}</h3>
-                <p className="text-gray-400">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Waitlist Section */}
-      <section id="waitlist" className="py-20 bg-gradient-to-b from-gray-900 to-black">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-2xl mx-auto text-center"
-          >
-            <h2 className="text-4xl font-bold mb-6">Join the Waitlist</h2>
-            <p className="text-gray-400 mb-8">
-              Be among the first to experience the future of coding education.
-              Get early access and exclusive benefits.
-            </p>
             <WaitlistForm />
+          </motion.div>
+
+          {/* Features Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mt-20"
+          >
+            {[
+              {
+                icon: <FaRobot size={32} />,
+                title: "AI-Powered Learning",
+                description: "Get a personalized curriculum that adapts to your learning style and pace."
+              },
+              {
+                icon: <FaCode size={32} />,
+                title: "Real-World Projects",
+                description: "Work on practical projects that matter in today's tech landscape."
+              },
+              {
+                icon: <FaGraduationCap size={32} />,
+                title: "Expert Guidance",
+                description: "Learn from industry professionals and AI assistants."
+              },
+              {
+                icon: <FaLightbulb size={32} />,
+                title: "Innovation Focus",
+                description: "Stay ahead with cutting-edge technologies and best practices."
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 + index * 0.1 }}
+                className="group relative p-6 bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-800 
+                          hover:border-gray-700 transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl 
+                              opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-blue-500/10 
+                                text-blue-400 mb-4">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 text-gray-100">{feature.title}</h3>
+                  <p className="text-gray-400">{feature.description}</p>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
