@@ -44,14 +44,17 @@ npm run dev
 
 ## Production Deployment
 
-This project is configured for deployment on GitHub Pages. To deploy:
+This project is configured for deployment on GitHub Pages using the `/docs` directory on the `main` branch. To deploy:
 
 1. Push your changes to the `main` branch
 2. GitHub Actions will automatically:
    - Build the Next.js application
-   - Deploy the static files to the `/docs` directory
-   - Push the changes to the main branch
-3. The site will be available at `https://yourusername.github.io/docs`
+   - Update the `/docs` directory with the latest build
+   - Commit and push the changes
+3. Ensure GitHub Pages is configured to deploy from:
+   - Branch: `main`
+   - Folder: `/docs`
+4. Your site will be available at your GitHub Pages URL
 
 ### Manual Deployment
 
@@ -61,10 +64,8 @@ If you need to deploy manually:
 # Build the project
 npm run build
 
-# Copy the built files to the /docs directory
-cp -r out docs
-
-# Commit and push the changes
+# The build will automatically go to the /docs directory
+# Just commit and push the changes
 git add docs
 git commit -m "Update /docs directory"
 git push
