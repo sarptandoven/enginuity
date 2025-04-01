@@ -17,6 +17,7 @@ const nextConfig = {
     return config;
   },
   transpilePackages: ['framer-motion', 'react-icons'],
+  trailingSlash: true,
 };
 
 module.exports = nextConfig; 
