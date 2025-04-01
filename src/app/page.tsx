@@ -8,6 +8,59 @@ const WaitlistForm = dynamic(() => import('@/components/WaitlistForm'), {
   ssr: false,
 });
 
+interface Feature {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+interface Step {
+  step: string;
+  title: string;
+  description: string;
+}
+
+const features: Feature[] = [
+  {
+    icon: <FaRobot style={{ fontSize: '2rem', color: '#60a5fa' }} />,
+    title: "AI-Powered Learning",
+    description: "Personalized curriculum that adapts to your learning style and pace"
+  },
+  {
+    icon: <FaCode style={{ fontSize: '2rem', color: '#a78bfa' }} />,
+    title: "Real-World Projects",
+    description: "Work on practical projects that matter in today's tech landscape"
+  },
+  {
+    icon: <FaGraduationCap style={{ fontSize: '2rem', color: '#4ade80' }} />,
+    title: "Expert Guidance",
+    description: "Get mentored by industry professionals and AI assistants"
+  },
+  {
+    icon: <FaLightbulb style={{ fontSize: '2rem', color: '#facc15' }} />,
+    title: "Innovation Focus",
+    description: "Learn cutting-edge technologies and best practices"
+  }
+];
+
+const steps: Step[] = [
+  {
+    step: "01",
+    title: "Sign Up",
+    description: "Join our platform and tell us about your goals and experience"
+  },
+  {
+    step: "02",
+    title: "Get Your Path",
+    description: "Receive a personalized learning journey crafted by our AI"
+  },
+  {
+    step: "03",
+    title: "Start Learning",
+    description: "Begin your journey with hands-on projects and expert guidance"
+  }
+];
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
@@ -70,28 +123,7 @@ export default function Home() {
       <section id="features" className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                icon: <FaRobot className="w-8 h-8 text-blue-400" />,
-                title: "AI-Powered Learning",
-                description: "Personalized curriculum that adapts to your learning style and pace"
-              },
-              {
-                icon: <FaCode className="w-8 h-8 text-purple-400" />,
-                title: "Real-World Projects",
-                description: "Work on practical projects that matter in today's tech landscape"
-              },
-              {
-                icon: <FaGraduationCap className="w-8 h-8 text-green-400" />,
-                title: "Expert Guidance",
-                description: "Get mentored by industry professionals and AI assistants"
-              },
-              {
-                icon: <FaLightbulb className="w-8 h-8 text-yellow-400" />,
-                title: "Innovation Focus",
-                description: "Learn cutting-edge technologies and best practices"
-              }
-            ].map((feature, index) => (
+            {features.map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -121,23 +153,7 @@ export default function Home() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {[
-              {
-                step: "01",
-                title: "Sign Up",
-                description: "Join our platform and tell us about your goals and experience"
-              },
-              {
-                step: "02",
-                title: "Get Your Path",
-                description: "Receive a personalized learning journey crafted by our AI"
-              },
-              {
-                step: "03",
-                title: "Start Learning",
-                description: "Begin your journey with hands-on projects and expert guidance"
-              }
-            ].map((step, index) => (
+            {steps.map((step, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
