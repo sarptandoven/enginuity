@@ -2,8 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
-  distDir: 'docs',
-  basePath: '',
+  distDir: 'out',
+  basePath: '/enginuity',
+  assetPrefix: '/enginuity/',
   images: {
     unoptimized: true,
   },
