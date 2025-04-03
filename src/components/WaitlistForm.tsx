@@ -3,6 +3,7 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { motion } from 'framer-motion';
 import { FaEnvelope, FaCheck, FaTriangleExclamation } from 'react-icons/fa6';
+import { supabase } from '@/lib/supabase';
 
 const WaitlistForm = () => {
   const [email, setEmail] = useState('');
@@ -14,12 +15,17 @@ const WaitlistForm = () => {
     setStatus('loading');
 
     try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([{ email, signed_up_at: new Date().toISOString() }]);
+
+      if (error) throw error;
+
       setStatus('success');
       setMessage('Thanks for joining! We\'ll be in touch soon.');
       setEmail('');
     } catch (error) {
+      console.error('Error:', error);
       setStatus('error');
       setMessage('Something went wrong. Please try again.');
     }
