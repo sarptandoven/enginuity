@@ -1,14 +1,11 @@
-import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import ClientLayout from './client-layout';
+import Providers from '@/components/Providers';
+import { metadata } from './metadata';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'Enginuity - AI-Powered Coding Education',
-  description: 'Learn to code like a pro with personalized AI-powered projects and guidance.',
-};
+export { metadata };
 
 export default function RootLayout({
   children,
@@ -18,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.className} bg-[#0A0A0B] text-white min-h-screen`}>
-        <ClientLayout>{children}</ClientLayout>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

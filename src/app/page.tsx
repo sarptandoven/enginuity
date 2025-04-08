@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fa6';
 import SmoothScroll from '@/components/SmoothScroll';
 import { useAuth } from '@/lib/auth-context';
+import WaitlistForm from '@/components/WaitlistForm';
 
 // Define types
 interface Testimonial {
@@ -95,12 +96,11 @@ const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) =>
 
 // Dynamically import components that require client-side rendering
 const Hero3D = dynamic(() => import('@/components/Hero3D'), { ssr: false });
-const WaitlistForm = dynamic(() => import('@/components/WaitlistForm'), { ssr: false });
 const AnimatedBackground = dynamic(() => import('@/components/AnimatedBackground'), { ssr: false });
 
 export default function Home() {
   const featuresRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const { session, status } = useAuth();
   
   useEffect(() => {
     // Register GSAP plugins
@@ -199,50 +199,65 @@ export default function Home() {
           
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/80 z-10" />
           
-          <div className="relative z-20 h-full flex flex-col items-center justify-center px-4 text-center">
+          <div className="relative z-20 h-full flex flex-col items-center justify-center px-4 text-center max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
+              transition={{ duration: 1.2, delay: 0.5, type: "spring", stiffness: 100 }}
+              className="mb-8"
             >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-                Revolutionize Your Learning
+              <h1 className="text-6xl md:text-8xl font-black mb-6 leading-tight">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-gradient">
+                  Transform Your
+                </span>
+                <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-400 animate-gradient">
+                  Coding Journey
+                </span>
               </h1>
             </motion.div>
             
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="max-w-4xl"
             >
-              <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mb-10">
-                AI-powered personalized education platform designed to transform how you master coding.
+              <p className="text-2xl md:text-3xl text-gray-200 mb-12 leading-relaxed font-light">
+                Experience the future of coding education with our
+                <span className="text-blue-400 font-medium"> AI-powered </span>
+                platform that adapts to
+                <span className="text-purple-400 font-medium"> your unique journey</span>.
               </p>
             </motion.div>
             
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 1.2 }}
-              className="flex flex-col sm:flex-row gap-4"
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="flex flex-col sm:flex-row gap-6"
             >
-              {user ? (
-                <Link href="/dashboard" className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white font-semibold 
-                                 text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform 
-                                 hover:scale-105 shadow-lg hover:shadow-blue-500/25 flex items-center">
-                  Go to Dashboard <FaArrowRight className="ml-2" />
-                </Link>
+              {status === 'loading' ? (
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              ) : status === 'authenticated' ? (
+                <div className="glass p-6 rounded-2xl">
+                  <p className="text-xl">Welcome back, <span className="text-blue-400 font-semibold">{session?.user?.name || session?.user?.email}</span></p>
+                </div>
               ) : (
-                <Link href="/signup" className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white font-semibold 
-                               text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform 
-                               hover:scale-105 shadow-lg hover:shadow-blue-500/25">
-                  Get Started
-                </Link>
+                <div className="max-w-md mx-auto glass p-8 rounded-2xl">
+                  <p className="text-xl mb-6 font-medium text-blue-400">Join our exclusive waitlist!</p>
+                  <WaitlistForm />
+                </div>
               )}
               
-              <Link href="/demo" className="px-8 py-4 bg-gray-800/80 backdrop-blur-sm rounded-xl text-white font-semibold 
-                           text-lg hover:bg-gray-700/80 transition-all duration-300 flex items-center">
-                <FaCirclePlay className="mr-2" /> Live Demo
+              <Link 
+                href="/demo" 
+                className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl text-white font-semibold 
+                         text-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center
+                         shadow-lg hover:shadow-2xl hover:scale-105 transform"
+              >
+                <FaCirclePlay className="mr-3 group-hover:animate-pulse" /> 
+                Watch Demo
               </Link>
             </motion.div>
             
@@ -252,11 +267,11 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 1.8 }}
               className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
             >
-              <div className="flex flex-col items-center">
-                <p className="text-sm text-gray-400 mb-2">Scroll to explore</p>
-                <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center p-1">
+              <div className="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform duration-300">
+                <p className="text-sm text-gray-400 mb-2 font-medium tracking-wide">Explore More</p>
+                <div className="w-6 h-10 border-2 border-blue-400 rounded-full flex justify-center p-1">
                   <motion.div 
-                    className="w-1 h-1 bg-gray-400 rounded-full"
+                    className="w-1 h-1 bg-blue-400 rounded-full"
                     animate={{ 
                       y: [0, 12, 0],
                     }}
@@ -273,30 +288,60 @@ export default function Home() {
         </section>
         
         {/* Features section */}
-        <section className="relative py-24 px-6 overflow-hidden">
-          <AnimatedBackground opacity={0.3} />
+        <section className="relative py-32 px-6 overflow-hidden">
+          <AnimatedBackground opacity={0.2} />
           
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <div className="text-center mb-24">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.8 }}
                 className="mb-0"
               >
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-                  Revolutionary Learning Experience
+                <h2 className="text-5xl md:text-7xl font-black mb-8 leading-tight">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-gradient">
+                    Revolutionary
+                  </span>
+                  <br />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-400 animate-gradient">
+                    Learning Experience
+                  </span>
                 </h2>
-                <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                  We've reimagined coding education from the ground up, focusing on what actually works
-                  to help you master complex skills quickly and effectively.
+                <p className="text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
+                  We've reimagined coding education from the ground up, focusing on what actually
+                  <span className="text-blue-400 font-medium"> works </span>
+                  to help you master complex skills
+                  <span className="text-purple-400 font-medium"> quickly and effectively</span>.
                 </p>
               </motion.div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {features.map((feature, index) => (
-                <FeatureCard key={index} feature={feature} index={index} />
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                >
+                  <div className="group h-full bg-gradient-to-br from-gray-900/80 to-gray-900/30 backdrop-blur-xl 
+                              border border-gray-800 hover:border-blue-500/50 rounded-2xl p-8
+                              hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500
+                              transform hover:-translate-y-2">
+                    <div className="text-5xl mb-8 group-hover:scale-110 transform transition-transform duration-500 
+                                text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent 
+                               bg-gradient-to-r from-blue-400 to-purple-600">
+                      {feature.title}
+                    </h3>
+                    <p className="text-lg text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">
+                      {feature.description}
+                    </p>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -385,53 +430,108 @@ export default function Home() {
         </section>
         
         {/* Testimonials section */}
-        <section className="py-24 px-6">
+        <section className="py-32 px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <div className="text-center mb-24">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.8 }}
                 className="mb-0"
               >
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-                  Success Stories
+                <h2 className="text-5xl md:text-7xl font-black mb-8 leading-tight">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-gradient">
+                    Success Stories
+                  </span>
                 </h2>
-                <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                  Hear from students who have transformed their careers through our platform.
+                <p className="text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
+                  Hear from students who have
+                  <span className="text-blue-400 font-medium"> transformed </span>
+                  their careers through our
+                  <span className="text-purple-400 font-medium"> revolutionary platform</span>.
                 </p>
               </motion.div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               {testimonials.map((testimonial, index) => (
-                <TestimonialCard key={index} testimonial={testimonial} index={index} />
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  className="group"
+                >
+                  <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-900/30 backdrop-blur-xl 
+                              border border-gray-800 group-hover:border-purple-500/30 transition-all duration-500
+                              transform group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-purple-500/10">
+                    <div className="flex items-start mb-8">
+                      <div className="relative">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-75 
+                                    group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div className="relative h-20 w-20 rounded-full overflow-hidden border-2 border-white/20 transform 
+                                    group-hover:scale-110 transition-transform duration-500">
+                          <img src={testimonial.avatar} alt={testimonial.author} className="object-cover w-full h-full" />
+                        </div>
+                      </div>
+                      <div className="ml-6">
+                        <p className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300">
+                          {testimonial.author}
+                        </p>
+                        <p className="text-lg text-blue-400 group-hover:text-purple-400 transition-colors duration-300">
+                          {testimonial.role}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xl text-gray-300 italic leading-relaxed group-hover:text-white transition-colors duration-300">
+                      "{testimonial.quote}"
+                    </p>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
         
         {/* Waitlist section */}
-        <section className="py-24 px-6 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-purple-900/10" />
+        <section className="py-32 px-6 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-purple-900/10 to-pink-900/10" />
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
           
-          <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="max-w-5xl mx-auto text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-0"
+              transition={{ duration: 0.8 }}
+              className="mb-16"
             >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-                Be the First to Experience it
+              <h2 className="text-5xl md:text-7xl font-black mb-8 leading-tight">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-gradient">
+                  Be the First to
+                </span>
+                <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-400 animate-gradient">
+                  Experience it
+                </span>
               </h2>
-              <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-                Join our exclusive waitlist to get early access to our revolutionary learning platform 
-                and receive special founder benefits.
+              <p className="text-2xl text-gray-300 mb-12 leading-relaxed font-light max-w-3xl mx-auto">
+                Join our exclusive waitlist to get
+                <span className="text-blue-400 font-medium"> early access </span>
+                to our revolutionary learning platform and receive
+                <span className="text-purple-400 font-medium"> special founder benefits</span>.
               </p>
             </motion.div>
             
-            <WaitlistForm />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="bg-gradient-to-br from-gray-900/80 to-gray-900/30 backdrop-blur-xl 
+                        border border-gray-800 rounded-2xl p-12 transform hover:scale-[1.02] 
+                        transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10"
+            >
+              <WaitlistForm />
+            </motion.div>
           </div>
         </section>
       </main>

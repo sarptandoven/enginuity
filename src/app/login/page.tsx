@@ -1,131 +1,117 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Head from 'next/head';
-import { signIn } from '@/lib/supabase';
-import { useAuth } from '@/lib/auth-context';
-import { 
-  InputField, 
-  SubmitButton, 
-  StatusMessage, 
-  AuthFormWrapper, 
-  AuthToggleLink,
-  FormStatus 
-} from '@/components/ui/AuthForms';
-import { FaEnvelope, FaLock } from 'react-icons/fa6';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<FormStatus>('idle');
-  const [message, setMessage] = useState('');
-  const router = useRouter();
-  const { refreshUser } = useAuth();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setLoading(true);
+    setError('');
+
     try {
-      setStatus('loading');
-      setMessage('');
-      
-      // Validate inputs
-      if (!email || !password) {
-        setStatus('error');
-        setMessage('Please fill in all fields');
-        return;
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Invalid email or password');
+      } else {
+        router.push('/');
       }
-      
-      // Attempt to sign in
-      const { data, error } = await signIn(email, password);
-      
-      if (error) {
-        console.error('Login error:', error);
-        setStatus('error');
-        setMessage(error.message || 'Failed to log in. Please check your credentials.');
-        return;
-      }
-      
-      // Success - update auth context and redirect
-      await refreshUser();
-      setStatus('success');
-      setMessage('Login successful! Redirecting...');
-      
-      // Short delay for better UX
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
-      
     } catch (error) {
-      console.error('Unexpected error:', error);
-      setStatus('error');
-      setMessage('An unexpected error occurred. Please try again.');
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 flex flex-col items-center">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Head>
         <title>Login | Engiunity</title>
       </Head>
       
-      <div className="w-full max-w-md px-4">
+      <div className="max-w-md w-full space-y-8">
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-3xl font-bold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-            Welcome Back
-          </h1>
+          <h2 className="mt-6 text-center text-3xl font-extrabold">
+            Sign in to your account
+          </h2>
         </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
-          <p className="text-gray-400 text-center mb-8">
-            Log in to your Engiunity account
-          </p>
-        </motion.div>
-        
-        <AuthFormWrapper>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <InputField
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email"
-              icon={<FaEnvelope className="text-gray-400" />}
-              id="email"
-              name="email"
-            />
-            
-            <InputField
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your password"
-              icon={<FaLock className="text-gray-400" />}
-              id="password"
-              name="password"
-            />
-            
-            <div className="mt-6">
-              <SubmitButton
-                text="Log In"
-                isLoading={status === 'loading'}
-                isDisabled={!email || !password}
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
               />
             </div>
-            
-            <StatusMessage message={message} status={status} />
-          </form>
-        </AuthFormWrapper>
-        
-        <AuthToggleLink isLogin={true} />
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="text-red-500 text-sm text-center">{error}</div>
+          )}
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => signIn('email', { email, callbackUrl: '/' })}
+              className="text-sm text-blue-600 hover:text-blue-500"
+            >
+              Sign in with magic link
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
