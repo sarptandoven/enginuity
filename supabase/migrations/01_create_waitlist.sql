@@ -1,6 +1,9 @@
 -- Enable UUID extension
 create extension if not exists "uuid-ossp";
 
+-- Drop existing table if it exists
+drop table if exists public.waitlist;
+
 -- Create the waitlist table
 create table public.waitlist (
   id uuid default uuid_generate_v4() primary key,
