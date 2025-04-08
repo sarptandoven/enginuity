@@ -1,19 +1,6 @@
 'use client';
 
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/supabase';
-
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL');
-}
-if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY');
-}
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Define database types
 export type WaitlistEntry = {
@@ -50,20 +37,31 @@ export type Database = {
   };
 };
 
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
+
+function createSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      'Missing environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be defined'
+    );
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseAnonKey);
+}
+
 export function getSupabaseClient() {
   if (typeof window === 'undefined') {
     throw new Error('Supabase client cannot be used server-side');
   }
-  return supabase;
-}
 
-// Log configuration status (but not the actual values)
-if (typeof window !== 'undefined') {
-  console.log('Supabase Configuration Status:', {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set',
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set',
-    source: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Environment' : 'Fallback'
-  });
+  if (!supabaseInstance) {
+    supabaseInstance = createSupabaseClient();
+  }
+
+  return supabaseInstance;
 }
 
 // Helper functions for authentication
@@ -80,7 +78,6 @@ export async function signUp(email: string, password: string, fullName: string) 
   });
   
   if (data.user && !error) {
-    // Create a profile for the user
     await supabase.from('profiles').insert({
       user_id: data.user.id,
       full_name: fullName,
@@ -116,4 +113,13 @@ export async function getUserProfile(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .single();
+}
+
+// Log configuration status (but not the actual values)
+if (typeof window !== 'undefined') {
+  console.log('Supabase Configuration Status:', {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set',
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set',
+    source: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Environment' : 'Fallback'
+  });
 } 
