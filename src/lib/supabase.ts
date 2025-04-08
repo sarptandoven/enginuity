@@ -37,24 +37,40 @@ export type Database = {
   };
 };
 
-let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
-
+// Initialize Supabase client with runtime check for environment variables
 function createSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Get environment variables
+  const supabaseUrl = typeof window !== 'undefined' 
+    ? window.ENV?.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL 
+    : process.env.NEXT_PUBLIC_SUPABASE_URL;
+  
+  const supabaseAnonKey = typeof window !== 'undefined'
+    ? window.ENV?.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      'Missing environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be defined'
-    );
+  if (!supabaseUrl) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL is required. Make sure it is set in your environment variables.');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey);
+  if (!supabaseAnonKey) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is required. Make sure it is set in your environment variables.');
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
 }
+
+// Singleton pattern with lazy initialization
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
 
 export function getSupabaseClient() {
   if (typeof window === 'undefined') {
-    throw new Error('Supabase client cannot be used server-side');
+    throw new Error('Supabase client cannot be used server-side. Use Server Components or API Routes for server-side operations.');
   }
 
   if (!supabaseInstance) {
