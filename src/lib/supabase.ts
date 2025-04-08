@@ -1,6 +1,7 @@
 'use client';
 
 import { createClient } from '@supabase/supabase-js';
+import { getEnvVars } from '@/config/env';
 
 // Define database types
 export type WaitlistEntry = {
@@ -37,78 +38,37 @@ export type Database = {
   };
 };
 
-// Hardcoded fallback values for development and testing
-// These will be overridden by environment variables when available
-const FALLBACK_URL = 'https://xyzcompany.supabase.co';
-const FALLBACK_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtdXZ3eHd4d3h3eHgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxODAwMDAwMDAwfQ.fallback-key-for-build';
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
 
-// Function to get environment variables with fallbacks
-function getSupabaseConfig() {
-  // Check if we're in the browser
-  if (typeof window !== 'undefined') {
-    // Try to get from window.__NEXT_DATA__.props.pageProps
-    try {
-      const nextData = (window as any).__NEXT_DATA__;
-      if (nextData?.props?.pageProps?.env) {
-        const env = nextData.props.pageProps.env;
-        if (env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-          return {
-            supabaseUrl: env.NEXT_PUBLIC_SUPABASE_URL,
-            supabaseAnonKey: env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-          };
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to get Supabase config from __NEXT_DATA__');
-    }
+export function getSupabaseClient() {
+  if (typeof window === 'undefined') {
+    throw new Error('Supabase client cannot be used server-side');
   }
 
-  // Try to get from process.env
-  const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const envKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (supabaseInstance) return supabaseInstance;
 
-  if (envUrl && envKey) {
-    return { supabaseUrl: envUrl, supabaseAnonKey: envKey };
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = getEnvVars();
+  
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables');
   }
 
-  // Use fallbacks as last resort
-  return {
-    supabaseUrl: FALLBACK_URL,
-    supabaseAnonKey: FALLBACK_ANON_KEY
-  };
+  supabaseInstance = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return supabaseInstance;
 }
-
-// Get the configuration
-const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
-
-// Initialize the Supabase client
-export const supabase = createClient(
-  supabaseUrl,
-  supabaseAnonKey,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: 'supabase.auth.token',
-    },
-    db: {
-      schema: 'public',
-    },
-  }
-);
 
 // Log configuration status (but not the actual values)
 if (typeof window !== 'undefined') {
   console.log('Supabase Configuration Status:', {
-    url: supabaseUrl ? 'Set' : 'Not Set',
-    key: supabaseAnonKey ? 'Set' : 'Not Set',
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set',
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set',
     source: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Environment' : 'Fallback'
   });
 }
 
 // Helper functions for authentication
 export async function signUp(email: string, password: string, fullName: string) {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -132,6 +92,7 @@ export async function signUp(email: string, password: string, fullName: string) 
 }
 
 export async function signIn(email: string, password: string) {
+  const supabase = getSupabaseClient();
   return await supabase.auth.signInWithPassword({
     email,
     password,
@@ -139,14 +100,17 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signOut() {
+  const supabase = getSupabaseClient();
   return await supabase.auth.signOut();
 }
 
 export async function getSession() {
+  const supabase = getSupabaseClient();
   return await supabase.auth.getSession();
 }
 
 export async function getUserProfile(userId: string) {
+  const supabase = getSupabaseClient();
   return await supabase
     .from('profiles')
     .select('*')
