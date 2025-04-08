@@ -1,7 +1,8 @@
-import { PrismaAdapter } from '@auth/prisma-adapter';
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from 'bcryptjs';
 import NextAuth, { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import EmailProvider from 'next-auth/providers/email';
 import { prisma } from '@/lib/prisma';
 
 export const authOptions: NextAuthOptions = {
@@ -10,11 +11,23 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   pages: {
-    signIn: '/auth/signin',
-    signUp: '/auth/signup',
-    error: '/auth/error',
+    signIn: '/login',
+    signOut: '/',
+    error: '/error',
+    verifyRequest: '/verify-request',
   },
   providers: [
+    EmailProvider({
+      server: {
+        host: process.env.EMAIL_SERVER_HOST,
+        port: Number(process.env.EMAIL_SERVER_PORT),
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD,
+        },
+      },
+      from: process.env.EMAIL_FROM,
+    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -23,7 +36,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Missing credentials');
+          return null;
         }
 
         const user = await prisma.user.findUnique({
@@ -33,13 +46,16 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
-          throw new Error('Invalid credentials');
+          return null;
         }
 
-        const isValid = await compare(credentials.password, user.password);
+        const isPasswordValid = await compare(
+          credentials.password,
+          user.password
+        );
 
-        if (!isValid) {
-          throw new Error('Invalid credentials');
+        if (!isPasswordValid) {
+          return null;
         }
 
         return {
@@ -52,7 +68,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ token, session }) {
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.name = token.name;
