@@ -37,24 +37,18 @@ export type Database = {
   };
 };
 
-if (
-  typeof window !== 'undefined' &&
-  !process.env.NEXT_PUBLIC_SUPABASE_URL
-) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
-}
+// Check for required environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (
-  typeof window !== 'undefined' &&
-  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
 }
 
 // Initialize the Supabase client
 export const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,
