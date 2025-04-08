@@ -15,11 +15,33 @@ const WaitlistForm = () => {
     setStatus('loading');
 
     try {
-      const { error } = await supabase
-        .from('waitlist')
-        .insert([{ email, signed_up_at: new Date().toISOString() }]);
+      // Validate email
+      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        throw new Error('Please enter a valid email address');
+      }
 
-      if (error) throw error;
+      // Check if email already exists
+      const { data: existingEntry } = await supabase
+        .from('waitlist')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (existingEntry) {
+        setStatus('error');
+        setMessage('This email is already on the waitlist');
+        return;
+      }
+
+      // Insert new entry
+      const { error: insertError } = await supabase
+        .from('waitlist')
+        .insert([{ email }]);
+
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw new Error('Failed to join waitlist. Please try again.');
+      }
 
       setStatus('success');
       setMessage('Thanks for joining! We\'ll be in touch soon.');
@@ -27,12 +49,17 @@ const WaitlistForm = () => {
     } catch (error) {
       console.error('Error:', error);
       setStatus('error');
-      setMessage('Something went wrong. Please try again.');
+      setMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
     }
   };
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
+    // Reset status when user starts typing again
+    if (status !== 'idle') {
+      setStatus('idle');
+      setMessage('');
+    }
   };
 
   return (
@@ -62,7 +89,7 @@ const WaitlistForm = () => {
           
           <button
             type="submit"
-            disabled={status === 'loading'}
+            disabled={status === 'loading' || !email}
             className="w-full px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl text-white font-semibold
                      hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50
                      disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300

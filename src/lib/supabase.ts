@@ -2,16 +2,52 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+// Define database types
+export type WaitlistEntry = {
+  id: string;
+  email: string;
+  created_at: string;
+  status: 'pending' | 'approved' | 'rejected';
+};
 
-if (!supabaseUrl) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL');
+// Define database schema
+export type Database = {
+  public: {
+    Tables: {
+      waitlist: {
+        Row: WaitlistEntry;
+        Insert: Omit<WaitlistEntry, 'id' | 'created_at' | 'status'>;
+        Update: Partial<WaitlistEntry>;
+      };
+    };
+  };
+};
+
+if (
+  typeof window !== 'undefined' &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL
+) {
+  console.error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
 }
 
-if (!supabaseAnonKey) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY');
+if (
+  typeof window !== 'undefined' &&
+  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+) {
+  console.error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
 }
 
-// Create a single supabase client for interacting with your database
-export const supabase = createClient(supabaseUrl, supabaseAnonKey); 
+// Initialize the Supabase client
+export const supabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: true,
+    },
+    db: {
+      schema: 'public',
+    },
+  }
+); 
