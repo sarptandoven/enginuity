@@ -1,11 +1,12 @@
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import ClientLayout from './client-layout';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata = {
-  title: 'Enginuity – AI-Powered Coding Education',
+export const metadata: Metadata = {
+  title: 'Enginuity - AI-Powered Coding Education',
   description: 'Learn to code like a pro with personalized AI-powered projects and guidance.',
 };
 

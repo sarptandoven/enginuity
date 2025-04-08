@@ -1,18 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
+  images: {
+    unoptimized: true,
+  },
+  basePath: process.env.NODE_ENV === 'production' ? '/Engiunity' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/Engiunity/' : '',
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
-  images: {
-    unoptimized: true,
-    domains: ['localhost'],
-  },
-  basePath: process.env.NODE_ENV === 'production' ? '/Engiunity' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/Engiunity/' : '',
-  trailingSlash: true,
-  experimental: {
-    appDir: true,
+  // Ensure environment variables are available at build time
+  publicRuntimeConfig: {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
 };
 

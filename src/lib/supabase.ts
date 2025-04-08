@@ -1,6 +1,14 @@
 'use client';
 
 import { createClient } from '@supabase/supabase-js';
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig() || {
+  publicRuntimeConfig: {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  },
+};
 
 // Define database types
 export type WaitlistEntry = {
@@ -24,7 +32,12 @@ export type Database = {
   public: {
     Tables: {
       waitlist: {
-        Row: WaitlistEntry;
+        Row: {
+          id: string;
+          email: string;
+          created_at: string;
+          status: 'pending' | 'approved' | 'rejected';
+        };
         Insert: Omit<WaitlistEntry, 'id' | 'created_at' | 'status'>;
         Update: Partial<WaitlistEntry>;
       };
@@ -37,40 +50,32 @@ export type Database = {
   };
 };
 
-// Initialize Supabase client with runtime check for environment variables
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
+
 function createSupabaseClient() {
-  // Get environment variables
-  const supabaseUrl = typeof window !== 'undefined' 
-    ? window.ENV?.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL 
-    : process.env.NEXT_PUBLIC_SUPABASE_URL;
-  
-  const supabaseAnonKey = typeof window !== 'undefined'
-    ? window.ENV?.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = publicRuntimeConfig.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = publicRuntimeConfig.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL is required. Make sure it is set in your environment variables.');
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL is required');
   }
 
   if (!supabaseAnonKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is required. Make sure it is set in your environment variables.');
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is required');
   }
 
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
-      persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
   });
 }
 
-// Singleton pattern with lazy initialization
-let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
-
 export function getSupabaseClient() {
   if (typeof window === 'undefined') {
-    throw new Error('Supabase client cannot be used server-side. Use Server Components or API Routes for server-side operations.');
+    throw new Error('Supabase client cannot be used server-side');
   }
 
   if (!supabaseInstance) {
@@ -129,6 +134,17 @@ export async function getUserProfile(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .single();
+}
+
+// Helper functions
+export async function addToWaitlist(email: string) {
+  const supabase = getSupabaseClient();
+  return await supabase.from('waitlist').insert([
+    {
+      email,
+      created_at: new Date().toISOString(),
+    },
+  ]);
 }
 
 // Log configuration status (but not the actual values)
