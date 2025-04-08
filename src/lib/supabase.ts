@@ -37,13 +37,9 @@ export type Database = {
   };
 };
 
-// Check for required environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// Get environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // Initialize the Supabase client
 export const supabase = createClient<Database>(
@@ -60,6 +56,16 @@ export const supabase = createClient<Database>(
     },
   }
 );
+
+// Add a check for environment variables that doesn't throw
+if (typeof window !== 'undefined') {
+  if (!supabaseUrl) {
+    console.error('Warning: Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
+  }
+  if (!supabaseAnonKey) {
+    console.error('Warning: Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
+  }
+}
 
 // Helper functions for authentication
 export async function signUp(email: string, password: string, fullName: string) {
