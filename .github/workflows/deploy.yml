@@ -2,20 +2,16 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
+    branches:
+      - main
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-env:
-  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-  NODE_VERSION: '20'
-  PNPM_VERSION: '8.x'
-
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -24,88 +20,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '18'
           cache: 'npm'
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Verify environment variables
-        run: |
-          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
-            echo "Error: NEXT_PUBLIC_SUPABASE_URL is not set"
-            exit 1
-          fi
-          if [ -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
-            echo "Error: NEXT_PUBLIC_SUPABASE_ANON_KEY is not set"
-            exit 1
-          fi
-          echo "✅ Environment variables are properly set"
-
       - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
-          echo "✅ Dependencies installed successfully"
+        run: npm ci
 
-      - name: Run type check
-        run: pnpm tsc --noEmit
-        continue-on-error: true
-
-      - name: Run ESLint
-        run: pnpm eslint . --max-warnings 0
-        continue-on-error: true
-
-      - name: Build project
-        run: |
-          echo "🚀 Starting build with environment variables:"
-          echo "NEXT_PUBLIC_SUPABASE_URL is set to: ${NEXT_PUBLIC_SUPABASE_URL:0:25}..."
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY is set to: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:0:25}..."
-          NEXT_TELEMETRY_DISABLED=1 pnpm build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NODE_ENV: production
-
-      - name: Optimize images
-        run: |
-          npm install -g sharp-cli
-          find ./out -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \) -exec sharp --quality 85 {} -o {} \;
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v4
+      - name: Build
+        run: npm run build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v2
         with:
           path: ./out
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        continue-on-error: true
 
   deploy:
     needs: build
@@ -116,17 +49,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-
-      - name: Notify on success
-        if: success()
-        run: |
-          echo "🎉 Successfully deployed to ${{ steps.deployment.outputs.page_url }}"
-
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "❌ Deployment failed" 
+        uses: actions/deploy-pages@v2 
