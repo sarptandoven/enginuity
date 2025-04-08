@@ -1,7 +1,19 @@
 'use client';
 
 import { createClient } from '@supabase/supabase-js';
-import { getEnvVars } from '@/config/env';
+import type { Database } from '@/types/supabase';
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL');
+}
+if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY');
+}
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Define database types
 export type WaitlistEntry = {
@@ -38,23 +50,11 @@ export type Database = {
   };
 };
 
-let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
-
 export function getSupabaseClient() {
   if (typeof window === 'undefined') {
     throw new Error('Supabase client cannot be used server-side');
   }
-
-  if (supabaseInstance) return supabaseInstance;
-
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = getEnvVars();
-  
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing Supabase environment variables');
-  }
-
-  supabaseInstance = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return supabaseInstance;
+  return supabase;
 }
 
 // Log configuration status (but not the actual values)
