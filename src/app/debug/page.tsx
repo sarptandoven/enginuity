@@ -3,34 +3,20 @@
 import { useEffect, useState } from 'react';
 
 export default function DebugPage() {
-  const [envVars, setEnvVars] = useState<{[key: string]: string}>({});
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    setEnvVars({
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || 'not set',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'set (hidden)' : 'not set',
-      NODE_ENV: process.env.NODE_ENV || 'not set',
-      basePath: window.location.pathname,
-      origin: window.location.origin,
-    });
-  }, []);
-
-  if (!mounted) {
-    return <div>Loading...</div>;
-  }
+  const env = {
+    NODE_ENV: process.env.NODE_ENV || 'not set',
+  };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Environment Debug</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Debug Information</h1>
       <div className="space-y-4">
-        {Object.entries(envVars).map(([key, value]) => (
-          <div key={key} className="border p-4 rounded">
-            <h2 className="font-semibold">{key}:</h2>
-            <p className="font-mono">{value}</p>
-          </div>
-        ))}
+        <div>
+          <h2 className="font-semibold">Environment Variables:</h2>
+          <pre className="bg-gray-100 p-4 rounded">
+            {JSON.stringify(env, null, 2)}
+          </pre>
+        </div>
       </div>
     </div>
   );

@@ -174,77 +174,45 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-              Choose Your Learning Path
-            </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Flexible pricing options to fit your learning needs and budget.
-              All plans include access to our revolutionary AI-powered platform.
-            </p>
-          </motion.div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Pricing</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Free Tier */}
+        <div className="border rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Free</h2>
+          <p className="text-gray-600 mb-4">Perfect for getting started</p>
+          <div className="text-3xl font-bold mb-4">$0</div>
+          <ul className="space-y-2">
+            <li>✓ Basic features</li>
+            <li>✓ Community support</li>
+            <li>✓ 1GB storage</li>
+          </ul>
         </div>
-        
-        <PricingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {pricingTiers.map((tier, index) => (
-            <PricingTier 
-              key={index}
-              tier={tier}
-              isAnnual={isAnnual}
-              isPopular={tier.isPopular}
-              index={index}
-              user={user}
-            />
-          ))}
+
+        {/* Pro Tier */}
+        <div className="border rounded-lg p-6 bg-blue-50">
+          <h2 className="text-xl font-semibold mb-4">Pro</h2>
+          <p className="text-gray-600 mb-4">For growing businesses</p>
+          <div className="text-3xl font-bold mb-4">$29/mo</div>
+          <ul className="space-y-2">
+            <li>✓ All Free features</li>
+            <li>✓ Priority support</li>
+            <li>✓ 10GB storage</li>
+            <li>✓ Advanced analytics</li>
+          </ul>
         </div>
-        
-        <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-800 p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Need a custom solution for your team or organization?</h2>
-          <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-            We offer tailored enterprise plans for teams of all sizes. Get in touch with us to discuss
-            your specific needs and how we can help your team level up their coding skills.
-          </p>
-          <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
-            Contact Sales
-          </button>
-        </div>
-        
-        <div className="mt-16 text-center">
-          <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-4xl mx-auto">
-            {[
-              {
-                question: "Can I switch plans later?",
-                answer: "Yes, you can upgrade or downgrade your plan at any time. If you upgrade, you'll be charged the prorated difference. If you downgrade, you'll receive credit towards your next billing cycle."
-              },
-              {
-                question: "Is there a free trial?",
-                answer: "We offer a 7-day free trial on all plans. No credit card required until you decide to continue with a paid subscription."
-              },
-              {
-                question: "What payment methods do you accept?",
-                answer: "We accept all major credit cards, PayPal, and Apple Pay. For enterprise plans, we can also accommodate wire transfers and purchase orders."
-              },
-              {
-                question: "Can I cancel anytime?",
-                answer: "Absolutely! You can cancel your subscription at any time. You'll continue to have access until the end of your current billing period."
-              }
-            ].map((faq, index) => (
-              <div key={index} className="bg-gray-900/30 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
-                <p className="text-gray-400">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
+
+        {/* Enterprise Tier */}
+        <div className="border rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Enterprise</h2>
+          <p className="text-gray-600 mb-4">For large organizations</p>
+          <div className="text-3xl font-bold mb-4">Custom</div>
+          <ul className="space-y-2">
+            <li>✓ All Pro features</li>
+            <li>✓ 24/7 support</li>
+            <li>✓ Unlimited storage</li>
+            <li>✓ Custom integrations</li>
+          </ul>
         </div>
       </div>
     </div>
