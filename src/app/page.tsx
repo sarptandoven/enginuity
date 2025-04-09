@@ -17,7 +17,6 @@ import {
   FaCirclePlay
 } from 'react-icons/fa6';
 import SmoothScroll from '@/components/SmoothScroll';
-import { useAuth } from '@/lib/auth-context';
 import WaitlistForm from '@/components/WaitlistForm';
 
 // Define types
@@ -100,7 +99,6 @@ const AnimatedBackground = dynamic(() => import('@/components/AnimatedBackground
 
 export default function Home() {
   const featuresRef = useRef<HTMLDivElement>(null);
-  const { session, status } = useAuth();
   
   useEffect(() => {
     // Register GSAP plugins
@@ -237,18 +235,10 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 1.2 }}
               className="flex flex-col sm:flex-row gap-6"
             >
-              {status === 'loading' ? (
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              ) : status === 'authenticated' ? (
-                <div className="glass p-6 rounded-2xl">
-                  <p className="text-xl">Welcome back, <span className="text-blue-400 font-semibold">{session?.user?.name || session?.user?.email}</span></p>
-                </div>
-              ) : (
-                <div className="max-w-md mx-auto glass p-8 rounded-2xl">
-                  <p className="text-xl mb-6 font-medium text-blue-400">Join our exclusive waitlist!</p>
-                  <WaitlistForm />
-                </div>
-              )}
+              <div className="max-w-md mx-auto glass p-8 rounded-2xl">
+                <p className="text-xl mb-6 font-medium text-blue-400">Join our exclusive waitlist!</p>
+                <WaitlistForm />
+              </div>
               
               <Link 
                 href="/demo" 

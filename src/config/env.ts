@@ -1,21 +1,22 @@
+// Environment variable configuration
 const getEnvVar = (key: string): string => {
   const value = process.env[key];
   if (!value) {
-    throw new Error(`Missing environment variable: ${key}`);
+    throw new Error(`Missing required environment variable: ${key}`);
   }
   return value;
 };
 
 export const getEnvVars = () => {
   if (typeof window === 'undefined') {
+    // Server-side
     return {
-      SUPABASE_URL: '',
-      SUPABASE_ANON_KEY: ''
+      // Add any server-side environment variables here
     };
   }
 
+  // Client-side
   return {
-    SUPABASE_URL: getEnvVar('NEXT_PUBLIC_SUPABASE_URL'),
-    SUPABASE_ANON_KEY: getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    // Add any client-side environment variables here
   };
 }; 
