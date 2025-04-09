@@ -3,16 +3,13 @@ const nextConfig = {
   output: 'export',
   images: {
     unoptimized: true,
-    domains: ['randomuser.me']
   },
   basePath: process.env.NODE_ENV === 'production' ? '/Engiunity' : '',
   assetPrefix: process.env.NODE_ENV === 'production' ? '/Engiunity/' : '',
   trailingSlash: true,
   env: {
-    // Add your environment variables here
-  },
-  experimental: {
-    // Add experimental features here
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
 };
 
