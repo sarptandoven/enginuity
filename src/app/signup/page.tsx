@@ -1,143 +1,102 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signUp } from '@/lib/supabase';
-import { useAuth } from '@/lib/auth-context';
-import { 
-  InputField, 
-  SubmitButton, 
-  StatusMessage, 
-  AuthFormWrapper, 
-  AuthToggleLink,
-  FormStatus 
-} from '@/components/ui/AuthForms';
-import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa6';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
 
-export default function SignupPage() {
-  const [fullName, setFullName] = useState('');
+export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<FormStatus>('idle');
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
-  const { refreshUser } = useAuth();
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
-      setStatus('loading');
-      setMessage('');
-      
-      // Validate inputs
-      if (!fullName || !email || !password) {
-        setStatus('error');
-        setMessage('Please fill in all fields');
-        return;
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Something went wrong');
       }
-      
-      if (password.length < 6) {
-        setStatus('error');
-        setMessage('Password must be at least 6 characters');
-        return;
-      }
-      
-      // Attempt to sign up
-      const { data, error } = await signUp(email, password, fullName);
-      
-      if (error) {
-        console.error('Signup error:', error);
-        setStatus('error');
-        setMessage(error.message || 'Failed to create account. Please try again.');
-        return;
-      }
-      
-      // Success - update auth context and redirect
-      await refreshUser();
-      setStatus('success');
-      setMessage('Account created successfully! Redirecting...');
-      
-      // Short delay for better UX
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
-      
+
+      router.push('/login?message=Account created successfully');
     } catch (error) {
-      console.error('Unexpected error:', error);
-      setStatus('error');
-      setMessage('An unexpected error occurred. Please try again.');
+      setError(error instanceof Error ? error.message : 'An error occurred during signup');
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 flex flex-col items-center">
-      <div className="w-full max-w-md px-4">
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="text-3xl font-bold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-            Join Engiunity
-          </h1>
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
-          <p className="text-gray-400 text-center mb-8">
-            Create your account to get started
-          </p>
-        </motion.div>
-        
-        <AuthFormWrapper>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <InputField
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Your full name"
-              icon={<FaUser className="text-gray-400" />}
-              id="fullName"
-              name="fullName"
-            />
-            
-            <InputField
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email"
-              icon={<FaEnvelope className="text-gray-400" />}
-              id="email"
-              name="email"
-            />
-            
-            <InputField
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Choose a password"
-              icon={<FaLock className="text-gray-400" />}
-              id="password"
-              name="password"
-            />
-            
-            <div className="mt-6">
-              <SubmitButton
-                text="Create Account"
-                isLoading={status === 'loading'}
-                isDisabled={!fullName || !email || !password}
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0A0B]">
+      <div className="max-w-md w-full space-y-8 p-8 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+            Create your account
+          </h2>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="text-red-500 text-center text-sm">{error}</div>
+          )}
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white placeholder-gray-400 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            
-            <StatusMessage message={message} status={status} />
-          </form>
-        </AuthFormWrapper>
-        
-        <AuthToggleLink isLogin={false} />
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white placeholder-gray-400 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Sign up
+            </button>
+          </div>
+        </form>
+        <div className="text-center">
+          <Link
+            href="/login"
+            className="font-medium text-blue-500 hover:text-blue-400"
+          >
+            Already have an account? Sign in
+          </Link>
+        </div>
       </div>
     </div>
   );
